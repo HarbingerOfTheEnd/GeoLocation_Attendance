@@ -6,10 +6,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.geofencing_project.database.users.UserRepository
 import com.example.geofencing_project.database.users.UserRoomDatabase
@@ -24,17 +21,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
         userViewModel = UserViewModel(UserRepository(UserRoomDatabase.getDatabase(this).userDao()))
-
-        // Handle window insets
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
 
         // Username and password fields
         val usernameField = findViewById<EditText>(R.id.et_username)
@@ -65,10 +54,6 @@ class MainActivity : AppCompatActivity() {
         withContext(Dispatchers.IO) {
             val user = userViewModel.getUserByUsername(username)
 
-            // Log the username being checked
-            Log.d("MainActivity", "Checking username: $username")
-            Log.d("MainActivity", "Retrieved user: $user")
-
             withContext(Dispatchers.Main) {
                 if (user == null) {
                     // Username is invalid
@@ -80,11 +65,15 @@ class MainActivity : AppCompatActivity() {
                     // Username and password are correct, navigate based on role
                     when (user.role) {
                         "admin" -> {
-                            val intent = Intent(this@MainActivity, AdminActivity::class.java)
+                            val intent = Intent(this@MainActivity, AdminActivity::class.java).apply {
+                                putExtra("USERNAME", user.name) // Pass username to AdminActivity
+                            }
                             startActivity(intent)
                         }
                         "user" -> {
-                            val intent = Intent(this@MainActivity, UserActivity::class.java)
+                            val intent = Intent(this@MainActivity, UserActivity::class.java).apply {
+                                putExtra("USERNAME", user.name) // Pass username to UserActivity
+                            }
                             startActivity(intent)
                         }
                         else -> {
@@ -93,6 +82,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+            }
         }
-    }
 }
