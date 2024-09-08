@@ -4,6 +4,9 @@ import androidx.lifecycle.LiveData
 
 class UserRepository(private val userDao: UserDao) {
 
+    fun getAllUsers(): LiveData<List<User>> {
+        return userDao.getAllUsers()
+    }
     suspend fun insert(user: User) {
         userDao.insert(user)
     }
@@ -27,5 +30,6 @@ class UserRepository(private val userDao: UserDao) {
     fun getUserByIdAndRole(userId: Int, role: String): LiveData<User> {
         return userDao.getUserByIdAndRole(userId, role)
     }
+
 
 }
